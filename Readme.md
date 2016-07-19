@@ -1,0 +1,1 @@
+This is yet another couchbase query benchmark using couchbase-net-client. It is based on ycsb.
