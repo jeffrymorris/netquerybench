@@ -15,7 +15,7 @@ namespace netquerybench.client
 {
     public class DB
     {
-        private static IBucket bucket;
+        private IBucket bucket;
         private string _bucketName;
         private Boolean _useKV;
         private Measurements _measurements;
@@ -34,15 +34,16 @@ namespace netquerybench.client
             _measurements = measurements;
         }
 
-        public void Read(String table, String key, HashSet<String> fields)
+        public void Read(String table, String key, HashSet<String> fields, Dictionary<string, string> fieldValues)
         {
             var startTime = DateTime.UtcNow;
-            Status status = read(table, key, fields);
+            Status status = read(table, key, fields, fieldValues);
+            _measurements.AddStatus(status);
             _measurements.Measure("READ", (DateTime.UtcNow - startTime).Milliseconds);
 
         }
 
-        private Status read(String table, String key, HashSet<String> fields)
+        private Status read(String table, String key, HashSet<String> fields, Dictionary<string, string> fieldValues)
         {
             if (_useKV)
             {
@@ -78,6 +79,7 @@ namespace netquerybench.client
         {
             var startTime = DateTime.UtcNow;
             Status status = update(table, key, fields);
+            _measurements.AddStatus(status);
             _measurements.Measure("UPDATE", (DateTime.UtcNow - startTime).Milliseconds);
             
         }
@@ -131,14 +133,15 @@ namespace netquerybench.client
 
         }
 
-        public void Scan(String table, String key, int recordCount, HashSet<String> fields)
+        public void Scan(String table, String key, int recordCount, HashSet<String> fields, Dictionary<string, string> fieldValues)
         {
             var startTime = DateTime.UtcNow;
-            Status status = scan(table, key, recordCount, fields);
-            _measurements.Measure("INSERT", (DateTime.UtcNow - startTime).Milliseconds);
+            Status status = scan(table, key, recordCount, fields, fieldValues);
+            _measurements.AddStatus(status);
+            _measurements.Measure("SCAN", (DateTime.UtcNow - startTime).Milliseconds);
         }
 
-        private Status scan(String table, String key, int recordCount, HashSet<String> fields)
+        private Status scan(String table, String key, int recordCount, HashSet<String> fields, Dictionary<string, string> fieldValues)
         {
             String scanQuery = "SELECT " + joinSet(fields) + " FROM `"
               + table + "` WHERE meta().id >= '$1' LIMIT $2";
@@ -159,8 +162,8 @@ namespace netquerybench.client
         {
             var startTime = DateTime.UtcNow;
             Status status = insert(table, key, fields);
+            _measurements.AddStatus(status);
             _measurements.Measure("INSERT", (DateTime.UtcNow - startTime).Milliseconds);
-
         }
 
         private Status insert(String table, String key, Dictionary<string, string> fields)

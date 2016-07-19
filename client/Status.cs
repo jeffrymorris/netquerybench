@@ -9,7 +9,11 @@ namespace netquerybench.client
     public enum Status
     {
         Success,
+
         Failure,
-        Timeout
+
+        IncorrectRecordCount,
+
+        ValueMismatch
     }
 }

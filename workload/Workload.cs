@@ -52,7 +52,7 @@ namespace netquerybench.workload
             {
                 string operation = "UPDATE";
                 operationsList.Add(operation);
-                operationChooser.AddValue((double)UpdateProportion, operation);
+                operationChooser.AddValue(UpdateProportion, operation);
             }
             if (Insertproportion > 0)
             {
@@ -67,7 +67,6 @@ namespace netquerybench.workload
             }
             fieldChooser = new UniformIntegerGenerator(0, FieldCount-1);
             scanLength = new UniformIntegerGenerator(0, ScanLength);
-
         }
 
         private string buildKeyName(int keynum)
@@ -118,16 +117,16 @@ namespace netquerybench.workload
             switch (operation)
             {
                 case "READ":
-                    db.Read(Table, keyName, fields);
+                    db.Read(Table, keyName, fields, fieldValues);
                     break;
                 case "UPDATE":
                     db.Update(Table, keyName, fieldValues);
                     break;
                 case "INSERT":
-                    db.Update(Table, keyName, fieldValues);
+                    db.Insert(Table, keyName, fieldValues);
                     break;
                 case "SCAN":
-                    db.Scan(Table, keyName, recordCount, fields);
+                    db.Scan(Table, keyName, recordCount, fields, fieldValues);
                     break;
             }
 

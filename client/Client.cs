@@ -26,7 +26,7 @@ namespace netquerybench
         {
             int opscount = 0;
             int docscount = 0;
-            while (++opscount < _operationCount)
+            while (opscount++ < _operationCount)
             {
                 if (_doTransactions)
                 {
@@ -35,7 +35,7 @@ namespace netquerybench
                 }
                 else
                 {
-                    if (++docscount > _documentCount) break;
+                    if (docscount++ > _documentCount) break;
                     _workload.DoInsert(_db);
                     
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using netquerybench.client;
 
 
 namespace netquerybench.measurements
@@ -8,6 +9,7 @@ namespace netquerybench.measurements
     {
         static Measurements singleton = null;
         private ConcurrentDictionary<string, OneMeasurement> dict = new ConcurrentDictionary<string, OneMeasurement>();
+        private ConcurrentDictionary<string, int> opStatus = new ConcurrentDictionary<string, int>();
         private Boolean initialized = false;
         private DateTime startTime;
 
@@ -32,6 +34,8 @@ namespace netquerybench.measurements
             Console.WriteLine("Overall Summary");
             Console.WriteLine("Throughput ops/s " + throughput);
 
+            int successPercent = (opStatus["Success"]/total)*100;
+            Console.WriteLine("There were "+ successPercent +"% of ops successful");
             foreach (var entry in dict)
             {
                 Console.WriteLine("Summary for " + entry.Key);
@@ -57,6 +61,25 @@ namespace netquerybench.measurements
             }
             OneMeasurement m = getOneMeasurement(operation);
             m.Measure(latency);
+        }
+
+        public void AddStatus(Status status)
+        {
+            switch (status)
+            {
+                case Status.Failure:
+                    opStatus.AddOrUpdate("Failue", 1, (s, i) => i + 1);
+                    break;
+                case Status.Success:
+                    opStatus.AddOrUpdate("Success", 1, (s, i) => i + 1);
+                    break;
+                case Status.IncorrectRecordCount:
+                    opStatus.AddOrUpdate("Incorrect record count", 1, (s, i) => i + 1);
+                    break;
+                case Status.ValueMismatch:
+                    opStatus.AddOrUpdate("Value mismatch", 1, (s, i) => i + 1);
+                    break;
+            }
         }
 
     }
