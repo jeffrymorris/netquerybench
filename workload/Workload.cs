@@ -13,12 +13,15 @@ namespace netquerybench.workload
         private IntegerGenerator keyChooser;
         private UniformIntegerGenerator fieldChooser;
         private List<string> fieldNames = new List<string>();
+        private IntegerGenerator scanLength;
 
         public string Table { get; set; }
 
         public int FieldCount { get; set; }
 
         public int FieldLength { get; set; }
+
+        public int ScanLength { get; set; }
 
         public bool ReadAllFields { get; set; }
 
@@ -63,6 +66,7 @@ namespace netquerybench.workload
                 fieldNames.Add("Field" + i);
             }
             fieldChooser = new UniformIntegerGenerator(0, FieldCount-1);
+            scanLength = new UniformIntegerGenerator(0, ScanLength);
 
         }
 
@@ -90,6 +94,7 @@ namespace netquerybench.workload
             String operation = operationChooser.NextString();
             int keyNum = keyChooser.NextInt();
             string keyName = buildKeyName(keyNum);
+            int recordCount = scanLength.NextInt();
             HashSet<String> fields = new HashSet<string>();
             if (!ReadAllFields)
             {
@@ -122,7 +127,7 @@ namespace netquerybench.workload
                     db.Update(Table, keyName, fieldValues);
                     break;
                 case "SCAN":
-                    db.Read(Table, keyName, fields);
+                    db.Scan(Table, keyName, recordCount, fields);
                     break;
             }
 

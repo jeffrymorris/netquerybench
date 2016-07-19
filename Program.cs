@@ -24,6 +24,9 @@ namespace netquerybench
         [ValueArgument(typeof(int), 'l', DefaultValue = 100)]
         public int fieldLength;
 
+        [ValueArgument(typeof(int), 'w', DefaultValue = 1000)]
+        public int scanLength;
+
         [ValueArgument(typeof(string), 'x', DefaultValue = "default")]
         public string table;
 
@@ -75,6 +78,7 @@ namespace netquerybench
             workload.ReadAllFields = opts.readAllFields;
             workload.Table = opts.table;
             workload.FieldLength = opts.fieldLength;
+            workload.ScanLength = opts.scanLength;
             workload.Init();
             return workload;
         }

@@ -2,7 +2,7 @@
 
 namespace netquerybench.workload
 {
-    public class UniformIntegerGenerator
+    public class UniformIntegerGenerator : IntegerGenerator
     {
         private int _lb;
         private int _ub;

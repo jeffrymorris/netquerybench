@@ -14,6 +14,7 @@ namespace netquerybench.measurements
         public int count = 0;
         public int total = 0;
         object Lock = new object();
+        SortedSet<int> latencies = new SortedSet<int>();
 
         public override void Measure(int latency)
         {
@@ -30,6 +31,7 @@ namespace netquerybench.measurements
                 total += latency;
                 count += 1;
                 avg = total/count;
+                latencies.Add(latency);
             }
         }
 
@@ -40,6 +42,9 @@ namespace netquerybench.measurements
 
         public override string GetSummary()
         {
+
+            int ninetyfiveIndex = (latencies.Count * 90)/100;
+            int ninetyfiveLatency = latencies.ElementAt(ninetyfiveIndex);
             StringBuilder sb = new StringBuilder();
             sb.Append("Operations: " +  count);
             sb.Append(Environment.NewLine);
@@ -49,7 +54,8 @@ namespace netquerybench.measurements
             sb.Append(Environment.NewLine);
             sb.Append("Max Latency(ms): " + max);
             sb.Append(Environment.NewLine);
-
+            sb.Append("95th percentile latency(ms): " + ninetyfiveLatency);
+            sb.Append(Environment.NewLine);
             return sb.ToString();
         }
     }

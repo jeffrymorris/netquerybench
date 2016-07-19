@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Couchbase;
 using Couchbase.Configuration.Client;
@@ -16,7 +17,7 @@ namespace netquerybench.client
     {
         private static IBucket bucket;
         private string _bucketName;
-        private Boolean kv;
+        private Boolean _useKV;
         private Measurements _measurements;
 
         public void Init(string hostname, int port, string bucketName, string password, Boolean useKV, Measurements measurements)
@@ -29,7 +30,7 @@ namespace netquerybench.client
             var couchbaseCluster = new Cluster(config);
             bucket = couchbaseCluster.OpenBucket(bucketName, password);
             _bucketName = bucketName;
-            kv = useKV;
+            _useKV = useKV;
             _measurements = measurements;
         }
 
@@ -43,7 +44,7 @@ namespace netquerybench.client
 
         private Status read(String table, String key, HashSet<String> fields)
         {
-            if (kv)
+            if (_useKV)
             {
                 var result = bucket.Get<dynamic>(formatId(table, key));
                 if (result.Status == ResponseStatus.Success)
@@ -84,7 +85,7 @@ namespace netquerybench.client
         private Status update(String table, String key, Dictionary<string, string> fields)
         {
 
-            if (kv)
+            if (_useKV)
             {
                 var result = bucket.Upsert<dynamic>(formatId(table, key), fields);
                 if (result.Status == ResponseStatus.Success)
@@ -130,8 +131,27 @@ namespace netquerybench.client
 
         }
 
-        public Status Scan()
+        public void Scan(String table, String key, int recordCount, HashSet<String> fields)
         {
+            var startTime = DateTime.UtcNow;
+            Status status = scan(table, key, recordCount, fields);
+            _measurements.Measure("INSERT", (DateTime.UtcNow - startTime).Milliseconds);
+        }
+
+        private Status scan(String table, String key, int recordCount, HashSet<String> fields)
+        {
+            String scanQuery = "SELECT " + joinSet(fields) + " FROM `"
+              + table + "` WHERE meta().id >= '$1' LIMIT $2";
+            var request = new QueryRequest(scanQuery).AddPositionalParameter(key, recordCount);
+            var result = bucket.Query<dynamic>(request);
+            if (result.Status == QueryStatus.Success)
+            {
+                return Status.Success;
+            }
+            else
+            {
+                return Status.Failure;
+            }
             return Status.Success;
         }
 
